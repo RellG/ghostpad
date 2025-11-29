@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GhostPad Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>👻 GhostPad Settings</h1>
+      <p class="subtitle">Customize your secure notepad experience</p>
+    </header>
+
+    <main>
+      <div class="settings-grid">
+        <!-- Appearance Section -->
+        <section class="settings-section">
+          <h2 class="section-title">🎨 Appearance</h2>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="theme">Theme</label>
+              <p class="setting-description">Choose your preferred color scheme</p>
+            </div>
+            <div class="setting-control">
+              <select id="theme" class="select-input">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="fontSize">Font Size</label>
+              <p class="setting-description">Adjust text size in the editor</p>
+            </div>
+            <div class="setting-control">
+              <div class="range-control">
+                <input type="range" id="fontSize" min="10" max="24" step="1" value="14" class="range-input">
+                <span id="fontSizeValue" class="range-value">14px</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="fontFamily">Font Family</label>
+              <p class="setting-description">Select your preferred font</p>
+            </div>
+            <div class="setting-control">
+              <select id="fontFamily" class="select-input">
+                <option value="monospace">Monospace</option>
+                <option value="sans-serif">Sans Serif</option>
+                <option value="serif">Serif</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Privacy & Security Section -->
+        <section class="settings-section">
+          <h2 class="section-title">🔒 Privacy & Security</h2>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label">Auto-Clear on Close</label>
+              <p class="setting-description">Always enabled - notes are cleared when browser closes</p>
+            </div>
+            <div class="setting-control">
+              <div class="badge badge-success">Enabled</div>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="confirmDelete">Confirm Deletions</label>
+              <p class="setting-description">Ask for confirmation before deleting notes</p>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="confirmDelete" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="defaultTimer">Default Timer</label>
+              <p class="setting-description">Auto-set timer for new notes</p>
+            </div>
+            <div class="setting-control">
+              <select id="defaultTimer" class="select-input">
+                <option value="0">Off</option>
+                <option value="60000">1 minute</option>
+                <option value="300000">5 minutes</option>
+                <option value="600000">10 minutes</option>
+                <option value="1800000">30 minutes</option>
+                <option value="3600000">1 hour</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Editor Section -->
+        <section class="settings-section">
+          <h2 class="section-title">📝 Editor</h2>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="autoSave">Auto-Save</label>
+              <p class="setting-description">Automatically save changes as you type</p>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="autoSave" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="spellCheck">Spell Check</label>
+              <p class="setting-description">Enable browser spell checking</p>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="spellCheck" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="lineNumbers">Line Numbers</label>
+              <p class="setting-description">Show line numbers in editor</p>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="lineNumbers">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Notifications Section -->
+        <section class="settings-section">
+          <h2 class="section-title">🔔 Notifications</h2>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="enableNotifications">Enable Notifications</label>
+              <p class="setting-description">Show alerts for timers and important actions</p>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="enableNotifications" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label class="setting-label" for="notificationSound">Notification Sound</label>
+              <p class="setting-description">Play sound with notifications</p>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="notificationSound">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Premium Section -->
+        <section class="settings-section">
+          <h2 class="section-title">⭐ Premium</h2>
+
+          <div class="premium-status" id="premiumStatus">
+            <div class="premium-status-indicator">
+              <span class="status-badge" id="statusBadge">Free Tier</span>
+              <p class="status-description" id="statusDescription">3 notes maximum</p>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3 class="setting-label">Upgrade to Premium</h3>
+              <p class="setting-description">
+                <strong>$1.99/month</strong> - Unlimited notes + support development
+              </p>
+              <ul class="premium-features">
+                <li>✨ Unlimited notes (up to 1,000)</li>
+                <li>🚀 All features included</li>
+                <li>💚 Support continued development</li>
+                <li>🔄 Cancel anytime, no commitment</li>
+              </ul>
+            </div>
+            <div class="setting-control">
+              <button id="upgradeButton" class="btn-primary">
+                Upgrade Now
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-item activation-section" id="activationSection">
+            <div class="setting-info">
+              <label class="setting-label" for="activationEmail">Activate Premium</label>
+              <p class="setting-description">
+                Enter the email you used for payment to activate premium features
+              </p>
+            </div>
+            <div class="setting-control activation-control">
+              <input
+                type="email"
+                id="activationEmail"
+                class="text-input"
+                placeholder="your@email.com"
+                autocomplete="email"
+              />
+              <button id="activateButton" class="btn-secondary">
+                Activate
+              </button>
+            </div>
+            <div class="activation-status" id="activationStatus"></div>
+          </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="settings-section">
+          <h2 class="section-title">ℹ️ About</h2>
+
+          <div class="about-content">
+            <div class="about-item">
+              <strong>Version:</strong> 2.3.0
+            </div>
+            <div class="about-item">
+              <strong>Description:</strong> Secure notepad that auto-deletes when browser closes. Perfect for sensitive information and temporary notes.
+            </div>
+            <div class="about-item">
+              <strong>Features:</strong>
+              <ul class="feature-list">
+                <li>Session-based storage (auto-clears on browser close)</li>
+                <li>Multiple note tabs with organization</li>
+                <li>Self-destruct timers with notifications</li>
+                <li>Markdown preview support</li>
+                <li>Export/Import functionality</li>
+                <li>Full-text search</li>
+                <li>Keyboard shortcuts</li>
+              </ul>
+            </div>
+            <div class="about-item">
+              <strong>Keyboard Shortcuts:</strong>
+              <ul class="shortcut-list">
+                <li><kbd>Ctrl+Shift+G</kbd> - Open GhostPad</li>
+                <li><kbd>Ctrl+Shift+N</kbd> - New note</li>
+                <li><kbd>Ctrl+Shift+Delete</kbd> - Clear current note</li>
+                <li><kbd>Ctrl+F</kbd> - Search</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="save-indicator" id="saveIndicator">
+        <span class="save-icon">✓</span>
+        <span class="save-text">Settings saved automatically</span>
+      </div>
+      <div class="footer-actions">
+        <button id="resetBtn" class="btn btn-secondary">Reset to Defaults</button>
+        <button id="exportSettingsBtn" class="btn btn-secondary">Export Settings</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

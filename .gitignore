@@ -1,0 +1,49 @@
+# Build files
+*.zip
+
+# Environment variables (IMPORTANT - don't commit secrets!)
+.env
+.env.local
+.env.*.local
+ghostpad-api/.env
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Railway
+.railway/
+
+# OS files
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# Chrome extension temporary files
+.crx
+.pem

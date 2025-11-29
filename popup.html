@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GhostPad Pro</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>👻 GhostPad</h1>
+        <p class="subtitle">🔒 Private notes that auto-delete when browser closes</p>
+        <p class="hint">💡 Double-click tab to rename • Ctrl+Shift+N for new note</p>
+      </div>
+      <div class="header-controls">
+        <button id="searchToggle" class="icon-btn" title="Search notes (Ctrl+F)" aria-label="Search">
+          🔍
+        </button>
+        <button id="themeToggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+          🌙
+        </button>
+        <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div id="searchBar" class="search-bar hidden">
+      <input type="text" id="searchInput" placeholder="Search all notes..." />
+      <button id="searchClose" class="icon-btn-small" aria-label="Close search">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <div id="tabsList" class="tabs-list">
+        <!-- Tabs will be dynamically added here -->
+      </div>
+      <button id="newTabBtn" class="new-tab-btn" title="New note (Ctrl+Shift+N)" aria-label="New note">
+        +
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+      <div class="editor-container">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <button id="privacyToggle" class="toolbar-btn" title="Toggle privacy blur" aria-label="Privacy mode">
+              👁️
+            </button>
+            <button id="lockToggle" class="toolbar-btn" title="Toggle read-only mode" aria-label="Lock/unlock">
+              🔓
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <button id="copyButton" class="toolbar-btn" title="Copy to clipboard" aria-label="Copy">
+              📋
+            </button>
+            <button id="downloadBtn" class="toolbar-btn" title="Download note" aria-label="Download">
+              💾
+            </button>
+            <button id="clearButton" class="toolbar-btn danger" title="Clear current note" aria-label="Clear">
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor-wrapper">
+          <textarea
+            id="notepad"
+            class="notepad"
+            placeholder="Start typing your secret notes here..."
+            spellcheck="true"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="controls-panel">
+        <div class="control-row">
+          <label for="timerSelect" class="control-label">Self-Destruct:</label>
+          <select id="timerSelect" class="control-select">
+            <option value="0">Off</option>
+            <option value="60000">1 minute</option>
+            <option value="300000">5 minutes</option>
+            <option value="600000">10 minutes</option>
+            <option value="1800000">30 minutes</option>
+            <option value="3600000">1 hour</option>
+          </select>
+          <span id="timerStatus" class="timer-status"></span>
+        </div>
+
+        <div class="control-row">
+          <button id="exportBtn" class="control-btn">
+            Export All
+          </button>
+          <button id="clearAllBtn" class="control-btn danger-outline">
+            Clear All
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Stats -->
+    <footer>
+      <div class="stats-container">
+        <span id="saveStatus" class="save-status">⚠️ Unsaved</span>
+        <span id="stats" class="stats-text">0 chars • 0 words • 0 lines</span>
+        <span id="lastModified" class="last-modified"></span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="confirmTitle">Confirm Action</h3>
+      <p id="confirmMessage">Are you sure?</p>
+      <div class="modal-actions">
+        <button id="confirmCancel" class="modal-btn cancel">Cancel</button>
+        <button id="confirmOk" class="modal-btn confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="utils.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
