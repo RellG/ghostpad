@@ -22,7 +22,9 @@ class SettingsManager {
 
   async init() {
     await this.loadSettings();
+    await this.migratePremiumToSync();
     await this.loadPremiumStatus();
+    await this.autoDetectPremium();
     this.setupEventListeners();
     this.setupPremiumListeners();
     this.applyTheme();
@@ -131,15 +133,100 @@ class SettingsManager {
     });
   }
 
+  async migratePremiumToSync() {
+    try {
+      // Check both local and sync storage
+      const local = await chrome.storage.local.get(['isPremium', 'premiumEmail']);
+      const sync = await chrome.storage.sync.get(['isPremium', 'premiumEmail']);
+
+      // Migrate from local to sync if exists locally but not in sync
+      if (local.isPremium && !sync.isPremium) {
+        await chrome.storage.sync.set({
+          isPremium: local.isPremium,
+          premiumEmail: local.premiumEmail
+        });
+        console.log('✅ Migrated premium status to sync storage');
+      }
+    } catch (error) {
+      console.error('Error migrating premium status:', error);
+    }
+  }
+
   async loadPremiumStatus() {
     try {
-      const result = await chrome.storage.local.get(['isPremium', 'premiumEmail']);
-      const isPremium = result.isPremium || false;
-      const premiumEmail = result.premiumEmail || '';
+      // Check sync storage first (cross-device), then fallback to local
+      const sync = await chrome.storage.sync.get(['isPremium', 'premiumEmail']);
+      const local = await chrome.storage.local.get(['isPremium', 'premiumEmail']);
+
+      const isPremium = sync.isPremium || local.isPremium || false;
+      const premiumEmail = sync.premiumEmail || local.premiumEmail || '';
 
       this.updatePremiumUI(isPremium, premiumEmail);
     } catch (error) {
       console.error('Error loading premium status:', error);
+    }
+  }
+
+  async autoDetectPremium() {
+    try {
+      // Skip if already premium
+      const sync = await chrome.storage.sync.get(['isPremium']);
+      if (sync.isPremium) {
+        return; // Already premium, no need to auto-detect
+      }
+
+      // Try to get user's Google account email
+      chrome.identity.getProfileUserInfo({ accountStatus: 'ANY' }, async (userInfo) => {
+        if (chrome.runtime.lastError) {
+          console.log('Identity API not available:', chrome.runtime.lastError);
+          return;
+        }
+
+        if (userInfo && userInfo.email) {
+          console.log('🔍 Auto-detecting premium status for:', userInfo.email);
+
+          // Check if this email is premium
+          try {
+            const response = await fetch(`${GhostPadConfig.API_URL}/verify-premium`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userInfo.email })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.isPremium) {
+              // Auto-activate premium!
+              await chrome.storage.sync.set({
+                isPremium: true,
+                premiumEmail: userInfo.email
+              });
+              await chrome.storage.local.set({
+                isPremium: true,
+                premiumEmail: userInfo.email
+              });
+
+              // Notify background script
+              await chrome.runtime.sendMessage({
+                action: 'setPremium',
+                isPremium: true
+              });
+
+              // Update UI
+              this.updatePremiumUI(true, userInfo.email);
+              this.showActivationStatus('success', '🎉 Premium auto-activated! You now have unlimited notes.');
+
+              console.log('✅ Premium auto-activated for:', userInfo.email);
+            } else {
+              console.log('ℹ️ Email not found in premium users:', userInfo.email);
+            }
+          } catch (error) {
+            console.log('Error auto-detecting premium:', error);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error in auto-detection:', error);
     }
   }
 
@@ -191,8 +278,12 @@ class SettingsManager {
       const data = await response.json();
 
       if (data.success && data.isPremium) {
-        // Premium verified! Save to storage
+        // Premium verified! Save to both local and sync storage
         await chrome.storage.local.set({
+          isPremium: true,
+          premiumEmail: email
+        });
+        await chrome.storage.sync.set({
           isPremium: true,
           premiumEmail: email
         });

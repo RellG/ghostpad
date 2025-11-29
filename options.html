@@ -215,15 +215,19 @@
             <div class="setting-info">
               <label class="setting-label" for="activationEmail">Activate Premium</label>
               <p class="setting-description">
-                Enter the email you used for payment to activate premium features
+                <strong>Already subscribed?</strong> Enter the email you used for Stripe payment to activate unlimited notes.
               </p>
+              <div class="activation-help">
+                <p>💡 <strong>Tip:</strong> Use the <strong>exact email</strong> you entered during checkout.</p>
+                <p>⏱️ Just subscribed? Activation is instant after payment completes.</p>
+              </div>
             </div>
             <div class="setting-control activation-control">
               <input
                 type="email"
                 id="activationEmail"
                 class="text-input"
-                placeholder="your@email.com"
+                placeholder="email@used-for-payment.com"
                 autocomplete="email"
               />
               <button id="activateButton" class="btn-secondary">
@@ -240,7 +244,7 @@
 
           <div class="about-content">
             <div class="about-item">
-              <strong>Version:</strong> 2.3.0
+              <strong>Version:</strong> 2.3.1
             </div>
             <div class="about-item">
               <strong>Description:</strong> Secure notepad that auto-deletes when browser closes. Perfect for sensitive information and temporary notes.

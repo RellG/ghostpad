@@ -403,13 +403,18 @@ async function handleMessage(request, sender, sendResponse) {
         break;
 
       case 'getPremiumStatus':
-        const premiumSettings = await chrome.storage.local.get(['isPremium']);
-        sendResponse({ isPremium: premiumSettings.isPremium || false });
+        // Check sync storage first (cross-device), then fallback to local
+        const syncSettings = await chrome.storage.sync.get(['isPremium']);
+        const localSettings = await chrome.storage.local.get(['isPremium']);
+        const isPremium = syncSettings.isPremium || localSettings.isPremium || false;
+        sendResponse({ isPremium: isPremium });
         break;
 
       case 'setPremiumStatus':
       case 'setPremium':
+        // Save to both local and sync storage for cross-device sync
         await chrome.storage.local.set({ isPremium: request.isPremium });
+        await chrome.storage.sync.set({ isPremium: request.isPremium });
         sessionData.isPremium = request.isPremium;
         sendResponse({ success: true });
         break;

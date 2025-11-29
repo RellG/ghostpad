@@ -1,142 +1,156 @@
 # Chrome Web Store Listing
 
 ## Extension Name
-GhostPad Pro
+GhostPad
 
 ## Short Description (132 characters max)
-Professional secure notepad with auto-wipe, multiple tabs, markdown support, and self-destruct timers. Privacy-first temporary notes.
+Secure, encrypted notepad with password protection, reminders, and unlimited notes. Privacy-first note-taking for Chrome.
 
 ## Detailed Description
 
-**Your notes vanish when the browser closes - perfect for sensitive information and temporary work!**
+**Your private, secure notepad right in Chrome - with encryption, reminders, and cross-device sync!**
 
-GhostPad Pro is a professional-grade secure notepad that automatically clears all your notes when you close your browser. Perfect for:
+GhostPad is a privacy-focused notepad extension that keeps your notes secure with optional password protection and AES-256 encryption. Perfect for:
 
-✅ Sensitive information that shouldn't be saved
-✅ Temporary work and quick notes
+✅ Private thoughts and personal notes
+✅ Sensitive information with encryption
+✅ Quick notes and reminders
 ✅ Password staging before pasting
-✅ Private thoughts and ideas
-✅ Code snippets and debugging
-✅ Meeting notes that should disappear
+✅ Code snippets and ideas
+✅ To-do lists and task tracking
 
 ## 🌟 KEY FEATURES
 
 **🔐 Privacy & Security**
-• Auto-wipe on browser close - notes stored in session memory only
-• No cloud storage or external servers
-• Optional encryption for sensitive content
-• Completely local and private
+• AES-256-GCM encryption for password-protected notes
+• PBKDF2 password hashing (100,000 iterations)
+• All notes stored locally in your browser
+• No cloud storage or external servers (except premium verification)
+• Privacy blur mode to hide content from onlookers
 
-**📝 Advanced Editor**
-• Multiple note tabs for organization
-• Markdown preview support
-• Rich text statistics (chars, words, lines, reading time)
-• Customizable fonts and sizes
-• Word wrap and lock mode
-• Spell checking
+**📝 Smart Note Management**
+• Create and organize multiple notes
+• Search across all your notes instantly
+• Character, word, and line count tracking
+• Auto-save as you type
+• Delete notes with confirmation protection
 
-**⏱️ Self-Destruct Timers**
-• Set timers from 1 minute to 1 hour
-• Browser notifications when notes clear
-• Visual countdown indicators
-• Perfect for time-sensitive information
+**⏰ Reminders & Notifications**
+• Set custom reminders for any note
+• Browser notifications at scheduled times
+• Never forget important tasks or deadlines
+• Snooze or dismiss reminders
+
+**🔒 Password Protection**
+• Protect sensitive notes with passwords
+• Military-grade AES-256-GCM encryption
+• Passwords never stored - only you know them
+• Lock/unlock notes on demand
+• Cannot be recovered if password forgotten (true security!)
 
 **🎨 Beautiful Interface**
-• Modern, professional design
+• Clean, modern design
 • Dark and light themes
-• Smooth animations
-• Clean, distraction-free writing experience
+• Privacy blur for shoulder-surfing protection
+• Smooth animations and transitions
+• Distraction-free writing experience
 
-**🔍 Search & Organization**
-• Full-text search across all notes
-• Quick note switching
-• Tab management
-• Recently modified sorting
+**💎 Premium Features ($1.99/month)**
+• Unlimited notes (Free tier: 3 notes)
+• All security and encryption features included
+• Cross-device premium sync
+• Support continued development
+• Cancel anytime
 
-**💾 Export**
-• Export all notes as JSON backup
-• Download individual notes
-• Settings backup and restore
-
-**⌨️ Keyboard Shortcuts**
-• Ctrl+Shift+G - Open GhostPad
-• Ctrl+Shift+N - New note
-• Ctrl+Shift+Delete - Clear note
-• Ctrl+F - Search
-• And more!
+**⚙️ Customizable**
+• Font size adjustment
+• Multiple font families
+• Theme selection (light/dark)
+• Privacy blur intensity
+• Notification preferences
 
 ## 🔒 YOUR PRIVACY MATTERS
 
-GhostPad Pro takes privacy seriously:
-• No data collection or analytics
-• No tracking or telemetry
-• No external server communication
-• All notes stored locally in session memory
-• Automatic cleanup on browser close
-• Open source and transparent
+GhostPad takes privacy seriously:
+• All notes stored locally in YOUR browser
+• No analytics, tracking, or telemetry
+• Password-protected notes use military-grade encryption
+• Only premium verification contacts our servers (email only)
+• We never see or access your note content
+• Transparent and secure architecture
 
 ## 💡 PERFECT FOR
 
-• Developers working with sensitive data
+• Developers and programmers
 • Security professionals
 • Privacy-conscious users
-• Anyone handling temporary information
-• Users who don't want notes persisted
-• Quick brainstorming sessions
-
-## ⚙️ HIGHLY CUSTOMIZABLE
-
-• Font size from 10px to 24px
-• Multiple font families
-• Confirmation dialogs
-• Default timers for new notes
-• Notification preferences
-• And much more in settings!
+• Students and researchers
+• Anyone needing quick, secure notes
+• People who want encrypted note storage
+• Users who need reminders and task management
 
 ## 🚀 HOW IT WORKS
 
 1. Click the GhostPad icon in your toolbar
-2. Start typing - notes save automatically
-3. Create multiple tabs to organize thoughts
-4. Set self-destruct timers if needed
-5. Export if you need to keep anything
-6. Close browser - everything disappears automatically
+2. Create a new note and start typing
+3. Optionally add a password for encryption
+4. Set reminders if needed
+5. Search and manage all your notes easily
+6. Upgrade to Premium for unlimited notes ($1.99/month)
+
+**Free Tier:** 3 notes with all features
+**Premium:** Unlimited notes + cross-device sync
 
 ## 📋 PERMISSIONS EXPLAINED
 
-• Storage - To save notes (session) and settings (local)
-• Notifications - To alert when timers expire
-• Alarms - To schedule timed deletions
+• **storage** - To save your notes locally and sync premium status across devices
+• **notifications** - To show reminder alerts for your notes
+• **alarms** - To schedule reminder notifications
+• **identity** (optional) - To auto-detect your email for premium activation
+• **identity.email** (optional) - To streamline premium verification
+• **host_permissions** - To verify premium subscriptions with our secure API
 
-We use ONLY the minimum permissions needed. No unnecessary access.
+We use ONLY the minimum permissions needed. No unnecessary access. No data collection.
 
 ## 💰 PRICING
 
 **Free Tier:**
-• 3 notes maximum
-• All core features included
-• Session-only storage
-• Self-destruct timers
-• Privacy blur & lock mode
-• Export functionality
-• Themes & customization
+• ✨ 3 notes included forever
+• Full password protection & encryption
+• Reminders and notifications
+• Search functionality
+• Privacy blur & themes
+• All customization options
+• No credit card required
 
 **Premium - $1.99/month:**
-• ✨ Unlimited notes
+• 🚀 Unlimited notes (up to 1,000)
 • Everything from Free tier
-• Support continued development
+• Cross-device premium sync
+• Instant activation
+• Cancel anytime
 
-Simple, transparent pricing. Cancel anytime. No hidden fees.
+**30-Day Money-Back Guarantee** - Try Premium risk-free!
 
-## ⭐ WHY CHOOSE GHOSTPAD PRO?
+Simple, transparent pricing. No hidden fees. No annual lock-in.
 
-Unlike other notepads, GhostPad Pro is designed from the ground up for temporary, secure note-taking. Your privacy is our priority, and we never store, transmit, or collect your data.
+## ⭐ WHY CHOOSE GHOSTPAD?
 
-**Try GhostPad Pro today and experience truly private note-taking!**
+Unlike other notepads, GhostPad is designed from the ground up for private, secure note-taking:
+
+✅ **True Privacy** - Notes stored locally, not in the cloud
+✅ **Military-Grade Encryption** - AES-256-GCM for protected notes
+✅ **No Data Collection** - Zero tracking, analytics, or telemetry
+✅ **Affordable Premium** - Just $1.99/month for unlimited notes
+✅ **Cross-Device Sync** - Premium status works on all your Chrome browsers
+✅ **Transparent** - Open source mindset, clear privacy policy
+✅ **Developer-Friendly** - Made by developers, for developers
+
+**Try GhostPad today and experience truly private note-taking!**
 
 ---
 
-Version 2.3.0 | Manifest V3 | Made with ❤️ for privacy
+Version 2.3.1 | Manifest V3 | Made with ❤️ for privacy
 
 ## Categories
 - Productivity
@@ -170,13 +184,16 @@ English
 - Marquee: 1400x560
 
 ## Privacy Policy URL
-[To be created - should explain data handling]
+https://github.com/RellG/ghostpad/blob/main/PRIVACY_POLICY.md
+
+## Terms of Service URL
+https://github.com/RellG/ghostpad/blob/main/TERMS_OF_SERVICE.md
 
 ## Support URL
-[GitHub repository or support page]
+https://github.com/RellG/ghostpad/issues
 
 ## Homepage URL
-[Extension homepage or GitHub]
+https://github.com/RellG/ghostpad
 
 ---
 
@@ -184,47 +201,53 @@ English
 
 ### FAQ
 
-**Q: Are my notes really deleted?**
-A: Yes! Notes are stored in Chrome's session storage, which is automatically cleared when you close the browser. This is enforced by the browser itself, not just the extension.
+**Q: Are my notes stored in the cloud?**
+A: No! All notes are stored locally in your browser using Chrome's storage API. They never leave your device (except premium verification uses email only).
 
-**Q: Can I recover notes after closing the browser?**
-A: No, that's the point! GhostPad Pro is designed for temporary notes. Always export important information before closing.
+**Q: Can I recover a password-protected note if I forget the password?**
+A: No - this is by design for true security. Your password is never stored, and the note is encrypted with AES-256-GCM. If you forget your password, the note cannot be decrypted.
 
 **Q: Does it work offline?**
-A: Yes! GhostPad Pro works completely offline. No internet connection required.
+A: Yes! GhostPad works completely offline. Internet is only required for premium subscription verification.
 
-**Q: Is it safe for passwords?**
-A: GhostPad Pro is great for staging passwords temporarily, but we recommend using a dedicated password manager for long-term storage.
+**Q: What's the difference between Free and Premium?**
+A: Free tier gives you 3 notes with ALL features (encryption, reminders, themes, etc.). Premium ($1.99/month) unlocks unlimited notes (up to 1,000) and cross-device premium sync.
 
-**Q: What's the difference from regular notepad?**
-A: GhostPad Pro automatically clears notes when you close your browser, has multiple tabs, markdown support, self-destruct timers, and is privacy-focused.
+**Q: How does premium activation work?**
+A: After subscribing via Stripe, enter your payment email in Settings > Premium. Activation is instant. Premium status syncs across all your Chrome browsers when signed in.
 
 **Q: Can I use it on multiple computers?**
-A: Yes, install the extension on each computer. However, notes don't sync (by design for privacy).
+A: Yes! Install the extension on each computer. Notes don't sync (for privacy), but your premium status does sync across devices.
 
 **Q: Does it collect any data?**
-A: No! Zero data collection, zero tracking, zero external communication. Completely private.
+A: No! Zero data collection, zero tracking, zero analytics. Only your email is stored for premium verification - we never see your note content.
+
+**Q: Is my payment information secure?**
+A: Yes! All payments are processed by Stripe (industry leader in payment security). We never see or store your credit card information.
 
 ### User Review Responses
 
 **For Positive Reviews:**
-"Thank you so much for the review! We're thrilled that GhostPad Pro is helping keep your notes secure. If you have any feature suggestions, we'd love to hear them!"
+"Thank you so much for the review! We're thrilled that GhostPad is helping keep your notes secure and private. If you have any feature suggestions, we'd love to hear them on GitHub!"
 
 **For Feature Requests:**
-"Thanks for the suggestion! We're always looking to improve. This has been added to our roadmap and we'll consider it for a future update."
+"Thanks for the suggestion! We're always looking to improve GhostPad. Please open an issue on our GitHub (https://github.com/RellG/ghostpad/issues) and we'll consider it for a future update."
 
 **For Bug Reports:**
-"Thank you for reporting this issue. We take bugs seriously and are investigating. Please feel free to share more details at [support contact]."
+"Thank you for reporting this issue. We take bugs seriously and are investigating. Please share more details at https://github.com/RellG/ghostpad/issues so we can help resolve this quickly."
+
+**For Premium Questions:**
+"Premium activation is instant! After subscribing, just enter your payment email in Settings > Premium. If you're having issues, contact us at TaReynolds725@gmail.com and we'll help immediately."
 
 ---
 
 ## Marketing Copy Variations
 
 ### Short Version (for social media)
-"GhostPad Pro: Your notes vanish when the browser closes. Perfect for sensitive info, temporary work, and privacy-first note-taking. Multiple tabs, markdown, timers, and more! 👻"
+"GhostPad: Secure notepad with AES-256 encryption, password protection, and reminders. 3 notes free, unlimited for $1.99/month. Privacy-first note-taking for Chrome! 👻"
 
 ### Medium Version (for blog posts)
-"Introducing GhostPad Pro - the secure notepad that takes privacy seriously. All notes automatically clear when you close your browser. Features include multiple tabs, markdown preview, self-destruct timers, full-text search, and a beautiful modern interface. Perfect for developers, security professionals, and anyone who values privacy."
+"Introducing GhostPad - the privacy-focused notepad extension for Chrome. Store notes locally with optional AES-256 encryption and password protection. Set reminders, search instantly, and keep everything private. Free tier: 3 notes. Premium: Unlimited notes for $1.99/month. Perfect for developers, students, and privacy-conscious users."
 
 ### Elevator Pitch
-"GhostPad Pro is a Chrome extension that gives you a secure, temporary notepad. Everything you write automatically disappears when you close your browser - no cloud storage, no tracking, completely private. It's like an incognito mode for your notes."
+"GhostPad is a Chrome extension that gives you a secure, encrypted notepad. All notes stored locally in your browser - no cloud, no tracking, completely private. Password protection with military-grade encryption. Free for 3 notes, $1.99/month for unlimited."

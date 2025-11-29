@@ -2,8 +2,8 @@
 // Update API_URL after deploying to Railway
 
 const GhostPadConfig = {
-  // Railway API URL - UPDATE THIS after deployment
-  API_URL: 'https://your-railway-url.up.railway.app',
+  // Railway API URL
+  API_URL: 'https://ghostpad-production.up.railway.app',
 
   // Stripe Payment Link
   STRIPE_PAYMENT_URL: 'https://buy.stripe.com/00w00i8vLeB21hL8n9eME00',

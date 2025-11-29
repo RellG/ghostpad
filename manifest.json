@@ -3,12 +3,14 @@
   "name": "GhostPad",
   "short_name": "GhostPad",
   "description": "Private notepad that auto-deletes when browser closes. Session-only storage, multiple tabs, privacy blur, self-destruct timers.",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": "GhostPad Team",
   "permissions": [
     "storage",
     "notifications",
-    "alarms"
+    "alarms",
+    "identity",
+    "identity.email"
   ],
   "host_permissions": [
     "https://*.up.railway.app/*"
