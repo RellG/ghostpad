@@ -35,13 +35,27 @@ const GhostPadUtils = {
 
     // Links (with URL validation for security)
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-      // Only allow http/https URLs to prevent XSS
-      if (url.match(/^https?:\/\//i)) {
-        // Use rel="noopener noreferrer" for security
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+      // Validate URL structure to prevent javascript: or data: URLs
+      try {
+        const urlObj = new URL(url);
+        // Only allow http and https protocols
+        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+          return `[${text}](${url})`; // Return plain text for invalid protocols
+        }
+
+        // Escape HTML entities in both URL and text to prevent XSS
+        const escapeHtml = (str) => str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+
+        return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)}</a>`;
+      } catch (e) {
+        // Invalid URL, return plain text
+        return `[${text}](${url})`;
       }
-      // Return plain text if URL is not http/https
-      return `[${text}](${url})`;
     });
 
     // Unordered lists
@@ -169,7 +183,9 @@ const GhostPadUtils = {
   // Highlight search results
   highlightText(text, query) {
     if (!query) return text;
-    const regex = new RegExp(`(${query})`, 'gi');
+    // Escape regex special characters to prevent ReDoS
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
     return text.replace(regex, '<mark>$1</mark>');
   },
 
@@ -198,7 +214,7 @@ const GhostPadUtils = {
       await navigator.clipboard.writeText(text);
       return true;
     } catch (err) {
-      console.error('Failed to copy:', err);
+      // Silent fail - don't log errors in production
       return false;
     }
   },
@@ -208,12 +224,16 @@ const GhostPadUtils = {
 
   // Generate random ID
   generateId() {
-    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   },
 
   // Sanitize filename
   sanitizeFilename(filename) {
-    return filename.replace(/[^a-z0-9_\-\.]/gi, '_').substring(0, 100);
+    return filename
+      .replace(/[^a-z0-9_\-\.]/gi, '_')  // Replace invalid chars
+      .replace(/\.{2,}/g, '.')            // Replace multiple periods with single
+      .replace(/^\.+/, '')                 // Remove leading periods
+      .substring(0, 100);
   }
 };
 

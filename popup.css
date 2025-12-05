@@ -264,6 +264,28 @@ header {
   font-weight: 600;
 }
 
+.tab-edit-icon {
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  cursor: pointer;
+  user-select: none;
+  margin-left: 2px;
+}
+
+.tab:hover .tab-edit-icon {
+  opacity: 0.6;
+}
+
+.tab.active .tab-edit-icon {
+  opacity: 0;
+}
+
+.tab.active:hover .tab-edit-icon {
+  opacity: 0.8;
+  filter: brightness(0) invert(1);
+}
+
 .tab-close {
   background: transparent;
   border: none;
@@ -504,17 +526,6 @@ main {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px var(--accent-light);
-}
-
-.timer-status {
-  font-size: 12px;
-  color: var(--warning);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.timer-status:not(.active) {
-  display: none;
 }
 
 .control-btn {

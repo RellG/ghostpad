@@ -9,10 +9,8 @@ class GhostPadApp {
     this.isLocked = false;
     this.isPrivacyMode = false;
     this.searchResults = [];
-    this.timers = {};
     this.isPremium = false;
     this.isSwitching = false;
-    this.timerIntervalId = null;
     this.autoSaveIntervalId = null;
 
     this.init();
@@ -27,7 +25,6 @@ class GhostPadApp {
     this.applyTheme();
     this.startAutoSave();
     this.setupKeyboardShortcuts();
-    this.checkTimers();
   }
 
   async loadSettings() {
@@ -122,11 +119,6 @@ class GhostPadApp {
       this.updateStats();
     }, 300));
 
-    // Timer
-    document.getElementById('timerSelect').addEventListener('change', (e) => {
-      this.setTimer(parseInt(e.target.value));
-    });
-
     // Controls
     document.getElementById('exportBtn').addEventListener('click', () => this.exportNotes());
     document.getElementById('clearAllBtn').addEventListener('click', () => this.clearAllNotes());
@@ -179,7 +171,14 @@ class GhostPadApp {
     const newTabsList = tabsList.cloneNode(false);
     tabsList.parentNode.replaceChild(newTabsList, tabsList);
 
-    const sortedNotes = Object.values(this.notes).sort((a, b) => b.lastModified - a.lastModified);
+    // Sort notes: active note first, then by last modified
+    const sortedNotes = Object.values(this.notes).sort((a, b) => {
+      // Active note always comes first (leftmost)
+      if (a.id === this.activeNoteId) return -1;
+      if (b.id === this.activeNoteId) return 1;
+      // Other notes sorted by last modified (most recent first)
+      return b.lastModified - a.lastModified;
+    });
 
     sortedNotes.forEach((note) => {
       const tab = document.createElement('div');
@@ -191,6 +190,12 @@ class GhostPadApp {
       tabTitle.textContent = GhostPadUtils.truncate(note.title || 'Untitled', 20);
       tabTitle.title = 'Double-click to rename';
 
+      // Add edit icon indicator
+      const editIcon = document.createElement('span');
+      editIcon.className = 'tab-edit-icon';
+      editIcon.innerHTML = '✏️';
+      editIcon.title = 'Double-click to rename';
+
       const closeBtn = document.createElement('button');
       closeBtn.className = 'tab-close';
       closeBtn.innerHTML = '×';
@@ -201,6 +206,7 @@ class GhostPadApp {
       });
 
       tab.appendChild(tabTitle);
+      tab.appendChild(editIcon);
       tab.appendChild(closeBtn);
 
       // Single click to switch
@@ -221,9 +227,9 @@ class GhostPadApp {
 
     const note = this.notes[noteId];
 
-    // Check if note still exists (may have been deleted by timer)
+    // Check if note still exists
     if (!note) {
-      console.warn('Cannot rename: note no longer exists');
+      // Note no longer exists - silent fail
       this.renderTabs(); // Re-render to remove stale tabs
       return;
     }
@@ -247,7 +253,7 @@ class GhostPadApp {
 
       // Check if note still exists before saving rename
       if (!this.notes[noteId]) {
-        console.warn('Cannot finish rename: note no longer exists');
+        // [Silent] ('Cannot finish rename: note no longer exists');
         tab.classList.remove('editing');
         input.remove();
         this.renderTabs(); // Re-render to remove stale tabs
@@ -324,9 +330,9 @@ class GhostPadApp {
   async switchNote(noteId) {
     if (noteId === this.activeNoteId) return;
 
-    // Check if target note exists (may have been deleted by timer)
+    // Check if target note exists
     if (!this.notes[noteId]) {
-      console.warn('Cannot switch: note no longer exists');
+      // [Silent] ('Cannot switch: note no longer exists');
       this.renderTabs(); // Re-render to remove stale tabs
       return;
     }
@@ -356,8 +362,10 @@ class GhostPadApp {
         });
 
         if (!saveResponse || !saveResponse.success) {
-          console.error('Failed to save current note before switching');
-          // Continue anyway - don't block user
+          // Don't continue if save failed - prevent data loss
+          this.showNotification('Failed to save current note. Please try again.');
+          this.isSwitching = false;
+          return;
         }
       }
 
@@ -393,7 +401,7 @@ class GhostPadApp {
   async performDeleteNote(noteId) {
     // Check if note still exists (may have been deleted already)
     if (!this.notes[noteId]) {
-      console.warn('Note already deleted');
+      // [Silent] ('Note already deleted');
       this.renderTabs();
       return;
     }
@@ -422,7 +430,7 @@ class GhostPadApp {
 
     if (!note) {
       // Note doesn't exist - clear UI and reload from storage
-      console.warn('Active note not found, reloading from storage');
+      // [Silent] ('Active note not found, reloading from storage');
       document.getElementById('notepad').value = '';
       this.updateStats();
       this.updateSaveStatus('saved');
@@ -436,17 +444,14 @@ class GhostPadApp {
     this.updateStats();
     this.updateLastModified(note.lastModified);
     this.updateSaveStatus('saved'); // Mark as saved when loading
-
-    // Update timer display
-    this.updateTimerDisplay();
   }
 
   async updateNoteContent(content) {
     if (!this.activeNoteId || this.isLocked) return;
 
-    // Check if note still exists (may have been deleted by timer)
+    // Check if note still exists
     if (!this.notes[this.activeNoteId]) {
-      console.warn('Cannot update content: note no longer exists');
+      // [Silent] ('Cannot update content: note no longer exists');
       this.updateSaveStatus('error');
       this.renderTabs(); // Re-render to sync UI
       await this.loadNotes(); // Reload from storage
@@ -469,7 +474,7 @@ class GhostPadApp {
     });
 
     if (!response || !response.success) {
-      console.error('Failed to save note content');
+      // [Silent] ('Failed to save note content');
       this.updateSaveStatus('error');
     } else {
       this.updateSaveStatus('saved');
@@ -611,90 +616,6 @@ class GhostPadApp {
     this.updateStats();
   }
 
-  async setTimer(milliseconds) {
-    if (!this.activeNoteId) return;
-
-    await chrome.runtime.sendMessage({
-      action: 'setTimer',
-      noteId: this.activeNoteId,
-      milliseconds: milliseconds
-    });
-
-    if (milliseconds > 0) {
-      this.timers[this.activeNoteId] = Date.now() + milliseconds;
-
-      if (this.settings.enableNotifications) {
-        const minutes = Math.round(milliseconds / 60000);
-        this.showNotification(`Timer set for ${minutes} minute${minutes > 1 ? 's' : ''}`);
-      }
-    } else {
-      delete this.timers[this.activeNoteId];
-    }
-
-    this.updateTimerDisplay();
-  }
-
-  updateTimerDisplay() {
-    const status = document.getElementById('timerStatus');
-    const timerSelect = document.getElementById('timerSelect');
-
-    if (this.timers[this.activeNoteId]) {
-      const remaining = this.timers[this.activeNoteId] - Date.now();
-
-      if (remaining > 0) {
-        const minutes = Math.ceil(remaining / 60000);
-        status.textContent = `⏱️ ${minutes}m`;
-        status.classList.add('active');
-
-        // Update select to show current timer (prevent jumping)
-        // Don't change if it would cause a re-trigger
-        const currentValue = parseInt(timerSelect.value);
-        if (currentValue === 0) {
-          // Only update if it's currently set to "Off"
-          timerSelect.value = this.getClosestTimerValue(remaining);
-        }
-      } else {
-        status.textContent = '';
-        status.classList.remove('active');
-        delete this.timers[this.activeNoteId];
-        timerSelect.value = '0';
-      }
-    } else {
-      status.textContent = '';
-      status.classList.remove('active');
-      timerSelect.value = '0';
-    }
-  }
-
-  getClosestTimerValue(milliseconds) {
-    const timerValues = [60000, 300000, 600000, 1800000, 3600000];
-    let closest = '0';
-    let minDiff = Infinity;
-
-    for (const value of timerValues) {
-      const diff = Math.abs(milliseconds - value);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = value.toString();
-      }
-    }
-
-    return closest;
-  }
-
-  async checkTimers() {
-    const response = await chrome.runtime.sendMessage({ action: 'getTimers' });
-
-    if (response && response.timers) {
-      this.timers = response.timers;
-      this.updateTimerDisplay();
-    }
-
-    // Update every 30 seconds
-    this.timerIntervalId = setInterval(() => {
-      this.updateTimerDisplay();
-    }, 30000);
-  }
 
   async exportNotes() {
     const response = await chrome.runtime.sendMessage({ action: 'exportNotes' });
@@ -835,26 +756,11 @@ class GhostPadApp {
       }
     }, 60000); // Update every minute
 
-    // Clean up intervals and flush pending saves when window closes
-    window.addEventListener('beforeunload', async () => {
-      // Flush any pending debounced saves before closing
-      if (this.activeNoteId && this.notes[this.activeNoteId]) {
-        const currentContent = document.getElementById('notepad').value;
-
-        // Immediate save before close (no debounce)
-        await chrome.runtime.sendMessage({
-          action: 'saveNote',
-          noteId: this.activeNoteId,
-          note: {
-            title: this.notes[this.activeNoteId].title,
-            content: currentContent,
-            lastModified: Date.now()
-          }
-        });
-      }
-
+    // Clean up intervals when window closes
+    // Note: Session storage auto-saves via the auto-save mechanism
+    // No need for beforeunload save as it's unreliable with async
+    window.addEventListener('beforeunload', () => {
       // Clear intervals
-      if (this.timerIntervalId) clearInterval(this.timerIntervalId);
       if (this.autoSaveIntervalId) clearInterval(this.autoSaveIntervalId);
     });
   }
@@ -892,21 +798,41 @@ class GhostPadApp {
   showUpgradeModal(message) {
     const modal = document.getElementById('confirmModal');
     document.getElementById('confirmTitle').textContent = '⭐ Upgrade to Premium';
-    document.getElementById('confirmMessage').innerHTML = `
-      <p>${message || 'You\'ve reached the free tier limit.'}</p>
-      <br>
-      <p><strong>Premium - $1.99/month:</strong></p>
-      <ul style="text-align: left; margin-left: 20px; margin-top: 10px;">
-        <li>✨ Unlimited notes (up to 1,000)</li>
-        <li>🚀 All features included</li>
-        <li>💚 Support continued development</li>
-        <li>🔄 Cancel anytime</li>
-      </ul>
-      <br>
-      <p style="font-size: 12px; color: var(--text-secondary);">
-        After payment, enter your email in Settings to activate premium features.
-      </p>
-    `;
+
+    // Use DOM manipulation instead of innerHTML to prevent XSS
+    const confirmMessage = document.getElementById('confirmMessage');
+    confirmMessage.innerHTML = ''; // Clear first
+
+    // Create message paragraph with textContent (safe)
+    const messagePara = document.createElement('p');
+    messagePara.textContent = message || 'You\'ve reached the free tier limit.';
+    confirmMessage.appendChild(messagePara);
+
+    confirmMessage.appendChild(document.createElement('br'));
+
+    // Add premium info (static HTML, no user input)
+    const premiumInfo = document.createElement('p');
+    premiumInfo.innerHTML = '<strong>Premium - $1.99/month:</strong>';
+    confirmMessage.appendChild(premiumInfo);
+
+    const featureList = document.createElement('ul');
+    featureList.style.textAlign = 'left';
+    featureList.style.marginLeft = '20px';
+    featureList.style.marginTop = '10px';
+    ['✨ Unlimited notes (up to 1,000)', '🚀 All features included', '💚 Support continued development', '🔄 Cancel anytime'].forEach(feature => {
+      const li = document.createElement('li');
+      li.textContent = feature;
+      featureList.appendChild(li);
+    });
+    confirmMessage.appendChild(featureList);
+
+    confirmMessage.appendChild(document.createElement('br'));
+
+    const footerNote = document.createElement('p');
+    footerNote.style.fontSize = '12px';
+    footerNote.style.color = 'var(--text-secondary)';
+    footerNote.textContent = 'After payment, enter your email in Settings to activate premium features.';
+    confirmMessage.appendChild(footerNote);
 
     modal.classList.remove('hidden');
 
@@ -927,13 +853,29 @@ class GhostPadApp {
   showPasswordUnlockModal() {
     const modal = document.getElementById('confirmModal');
     document.getElementById('confirmTitle').textContent = '🔒 Enter Master Password';
-    document.getElementById('confirmMessage').innerHTML = `
-      <p>Your notes are protected with a master password.</p>
-      <br>
-      <input type="password" id="masterPasswordInput" placeholder="Enter password"
-             style="width: 100%; padding: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); font-family: var(--font-family);">
-      <p id="passwordError" style="color: var(--danger); margin-top: 10px; display: none;">Incorrect password</p>
-    `;
+
+    // Use DOM manipulation instead of innerHTML to prevent XSS
+    const confirmMessage = document.getElementById('confirmMessage');
+    confirmMessage.innerHTML = ''; // Clear first
+
+    const para = document.createElement('p');
+    para.textContent = 'Your notes are protected with a master password.';
+    confirmMessage.appendChild(para);
+
+    confirmMessage.appendChild(document.createElement('br'));
+
+    const passwordInput = document.createElement('input');
+    passwordInput.type = 'password';
+    passwordInput.id = 'masterPasswordInput';
+    passwordInput.placeholder = 'Enter password';
+    passwordInput.style.cssText = 'width: 100%; padding: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); font-family: var(--font-family);';
+    confirmMessage.appendChild(passwordInput);
+
+    const errorPara = document.createElement('p');
+    errorPara.id = 'passwordError';
+    errorPara.style.cssText = 'color: var(--danger); margin-top: 10px; display: none;';
+    errorPara.textContent = 'Incorrect password';
+    confirmMessage.appendChild(errorPara);
 
     modal.classList.remove('hidden');
 

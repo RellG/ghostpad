@@ -147,7 +147,6 @@ let sessionData = {
   notes: {},
   activeNoteId: null,
   settings: {},
-  timers: {},
   isPremium: false,
   isPasswordUnlocked: false // Use flag instead of storing password
 };
@@ -206,27 +205,9 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
-// Handle alarms for timed deletions
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name.startsWith('clear_note_')) {
-    const noteId = alarm.name.replace('clear_note_', '');
-    clearNoteById(noteId);
-
-    // Send notification
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: chrome.runtime.getURL('icons/icon128.png'),
-      title: 'GhostPad',
-      message: 'Note cleared by timer',
-      priority: 1
-    });
-  }
-});
-
 // Clear all data when browser closes
 chrome.runtime.onSuspend.addListener(() => {
   chrome.storage.session.clear();
-  chrome.alarms.clearAll();
 });
 
 // Message handler
@@ -249,11 +230,11 @@ async function handleMessage(request, sender, sendResponse) {
         // Store notes in plaintext in session storage
         // They are still secure due to session storage isolation and auto-delete
 
-        // Check if note exists (may have been deleted by timer)
+        // Check if note exists
         if (!sessionData.notes[request.noteId]) {
           sendResponse({
             success: false,
-            error: 'Note no longer exists (may have been deleted by timer)'
+            error: 'Note no longer exists'
           });
           break;
         }
@@ -264,14 +245,21 @@ async function handleMessage(request, sender, sendResponse) {
           encrypted: false, // No longer encrypting for storage
           lastModified: Date.now()
         };
-        await chrome.storage.session.set({ notes: sessionData.notes });
-        sendResponse({ success: true });
+
+        try {
+          await chrome.storage.session.set({ notes: sessionData.notes });
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ success: false, error: 'Failed to save note' });
+        }
         break;
 
-      case 'createNote':
+      case 'createNote': {
         // Rate limiting check
         const now = Date.now();
-        noteCreationTimestamps = noteCreationTimestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
+        noteCreationTimestamps = noteCreationTimestamps
+          .filter(t => now - t < RATE_LIMIT_WINDOW)
+          .slice(-100); // Keep only last 100 entries max to prevent memory leak
 
         if (noteCreationTimestamps.length >= RATE_LIMIT_MAX) {
           sendResponse({
@@ -285,7 +273,7 @@ async function handleMessage(request, sender, sendResponse) {
         // Check note limit for free tier
         const noteCount = Object.keys(sessionData.notes).length;
         const settings = await chrome.storage.local.get(['isPremium']);
-        const isPremium = settings.isPremium || false;
+        const userIsPremium = settings.isPremium || false;
 
         // Absolute maximum check (even for premium)
         if (noteCount >= MAX_NOTE_LIMIT) {
@@ -297,7 +285,7 @@ async function handleMessage(request, sender, sendResponse) {
           break;
         }
 
-        if (!isPremium && noteCount >= FREE_NOTE_LIMIT) {
+        if (!userIsPremium && noteCount >= FREE_NOTE_LIMIT) {
           sendResponse({
             success: false,
             error: 'note_limit',
@@ -309,10 +297,21 @@ async function handleMessage(request, sender, sendResponse) {
         // Track this creation for rate limiting
         noteCreationTimestamps.push(now);
 
+        // Sanitize and validate title
+        const sanitizeTitle = (title) => {
+          if (!title || typeof title !== 'string') return 'Untitled';
+          // Remove control characters and HTML brackets
+          return title
+            .replace(/[\x00-\x1F\x7F]/g, '') // Remove control chars
+            .replace(/[<>]/g, '') // Remove HTML brackets for safety
+            .trim()
+            .substring(0, 100); // Max 100 chars
+        };
+
         const newNoteId = generateNoteId();
         const newNote = {
           id: newNoteId,
-          title: request.title || 'Untitled',
+          title: sanitizeTitle(request.title),
           content: '',
           created: Date.now(),
           lastModified: Date.now(),
@@ -320,23 +319,21 @@ async function handleMessage(request, sender, sendResponse) {
         };
         sessionData.notes[newNoteId] = newNote;
         sessionData.activeNoteId = newNoteId;
-        await chrome.storage.session.set({
-          notes: sessionData.notes,
-          activeNoteId: newNoteId
-        });
-        sendResponse({ success: true, noteId: newNoteId, note: newNote });
+
+        try {
+          await chrome.storage.session.set({
+            notes: sessionData.notes,
+            activeNoteId: newNoteId
+          });
+          sendResponse({ success: true, noteId: newNoteId, note: newNote });
+        } catch (error) {
+          sendResponse({ success: false, error: 'Failed to create note' });
+        }
         break;
+      }
 
       case 'deleteNote':
         delete sessionData.notes[request.noteId];
-
-        // Clear any associated alarms
-        chrome.alarms.clear(`clear_note_${request.noteId}`);
-
-        // Clean up timer entry
-        if (sessionData.timers && sessionData.timers[request.noteId]) {
-          delete sessionData.timers[request.noteId];
-        }
 
         // If this was the active note, select another one
         if (sessionData.activeNoteId === request.noteId) {
@@ -344,12 +341,15 @@ async function handleMessage(request, sender, sendResponse) {
           sessionData.activeNoteId = noteIds.length > 0 ? noteIds[0] : null;
         }
 
-        await chrome.storage.session.set({
-          notes: sessionData.notes,
-          activeNoteId: sessionData.activeNoteId,
-          timers: sessionData.timers
-        });
-        sendResponse({ success: true, activeNoteId: sessionData.activeNoteId });
+        try {
+          await chrome.storage.session.set({
+            notes: sessionData.notes,
+            activeNoteId: sessionData.activeNoteId
+          });
+          sendResponse({ success: true, activeNoteId: sessionData.activeNoteId });
+        } catch (error) {
+          sendResponse({ success: false, error: 'Failed to delete note' });
+        }
         break;
 
       case 'setActiveNote':
@@ -358,35 +358,10 @@ async function handleMessage(request, sender, sendResponse) {
         sendResponse({ success: true });
         break;
 
-      case 'setTimer':
-        if (request.milliseconds > 0) {
-          chrome.alarms.create(`clear_note_${request.noteId}`, {
-            when: Date.now() + request.milliseconds
-          });
-
-          if (!sessionData.timers) sessionData.timers = {};
-          sessionData.timers[request.noteId] = Date.now() + request.milliseconds;
-          await chrome.storage.session.set({ timers: sessionData.timers });
-        } else {
-          chrome.alarms.clear(`clear_note_${request.noteId}`);
-          if (sessionData.timers) {
-            delete sessionData.timers[request.noteId];
-            await chrome.storage.session.set({ timers: sessionData.timers });
-          }
-        }
-        sendResponse({ success: true });
-        break;
-
-      case 'getTimers':
-        await loadSessionData();
-        sendResponse({ timers: sessionData.timers || {} });
-        break;
-
       case 'clearAllNotes':
         sessionData.notes = {};
         sessionData.activeNoteId = null;
         await chrome.storage.session.clear();
-        chrome.alarms.clearAll();
         sendResponse({ success: true });
         break;
 
@@ -402,13 +377,14 @@ async function handleMessage(request, sender, sendResponse) {
         sendResponse({ success: true, data: exportData });
         break;
 
-      case 'getPremiumStatus':
+      case 'getPremiumStatus': {
         // Check sync storage first (cross-device), then fallback to local
         const syncSettings = await chrome.storage.sync.get(['isPremium']);
         const localSettings = await chrome.storage.local.get(['isPremium']);
-        const isPremium = syncSettings.isPremium || localSettings.isPremium || false;
-        sendResponse({ isPremium: isPremium });
+        const premiumStatus = syncSettings.isPremium || localSettings.isPremium || false;
+        sendResponse({ isPremium: premiumStatus });
         break;
+      }
 
       case 'setPremiumStatus':
       case 'setPremium':
@@ -502,10 +478,9 @@ async function decryptNote(note) {
 }
 
 async function loadSessionData() {
-  const data = await chrome.storage.session.get(['notes', 'activeNoteId', 'timers']);
+  const data = await chrome.storage.session.get(['notes', 'activeNoteId']);
   sessionData.notes = data.notes || {};
   sessionData.activeNoteId = data.activeNoteId || null;
-  sessionData.timers = data.timers || {};
 
   // If no notes exist, create a default one
   if (Object.keys(sessionData.notes).length === 0) {
@@ -539,7 +514,6 @@ async function initializeDefaultSettings() {
     autoSave: true,
     confirmDelete: true,
     enableNotifications: true,
-    defaultTimer: 0,
     isPremium: false,
     masterPasswordEnabled: false
   });
@@ -558,7 +532,6 @@ Your notes are stored in session-only memory and automatically deleted when you 
 
 ✨ KEY FEATURES
 • Multiple note tabs for organization
-• Self-destruct timers (1 min to 1 hour)
 • Privacy blur & lock mode
 • Markdown preview support
 • Full-text search across all notes
@@ -579,9 +552,11 @@ Your notes are stored in session-only memory and automatically deleted when you 
 🚀 GET STARTED
 1. Start typing - your notes save automatically
 2. Create new tabs to organize thoughts
-3. Set self-destruct timers if needed
+3. Double-click any tab title to rename it ✏️
 4. Export important notes before closing browser
 5. Close browser - everything disappears!
+
+💡 TIP: Hover over any tab to see the edit icon (✏️), then double-click to rename!
 
 Click the ⚙️ icon above to customize your experience.
 
@@ -672,10 +647,14 @@ async function verifyPassword(password, storedHash, storedSalt) {
 
 // Constant-time string comparison to prevent timing attacks
 function constantTimeCompare(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  // Always compare same length to prevent timing leaks
+  let diff = a.length ^ b.length;
+  const maxLen = Math.max(a.length, b.length);
+
+  for (let i = 0; i < maxLen; i++) {
+    const aChar = i < a.length ? a.charCodeAt(i) : 0;
+    const bChar = i < b.length ? b.charCodeAt(i) : 0;
+    diff |= aChar ^ bChar;
   }
   return diff === 0;
 }

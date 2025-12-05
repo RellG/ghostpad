@@ -2,13 +2,12 @@
   "manifest_version": 3,
   "name": "GhostPad",
   "short_name": "GhostPad",
-  "description": "Private notepad that auto-deletes when browser closes. Session-only storage, multiple tabs, privacy blur, self-destruct timers.",
-  "version": "2.3.1",
+  "description": "Private notepad that auto-deletes when browser closes. Session-only storage, multiple tabs, privacy blur.",
+  "version": "2.3.4",
   "author": "GhostPad Team",
   "permissions": [
     "storage",
     "notifications",
-    "alarms",
     "identity",
     "identity.email"
   ],
@@ -56,6 +55,6 @@
     }
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.up.railway.app"
   }
 }

@@ -8,7 +8,6 @@ class SettingsManager {
       fontSize: 14,
       fontFamily: 'monospace',
       confirmDelete: true,
-      defaultTimer: 0,
       autoSave: true,
       spellCheck: true,
       lineNumbers: false,
@@ -58,9 +57,6 @@ class SettingsManager {
     document.getElementById('lineNumbers').checked = this.settings.lineNumbers;
     document.getElementById('enableNotifications').checked = this.settings.enableNotifications;
     document.getElementById('notificationSound').checked = this.settings.notificationSound;
-
-    // Default Timer
-    document.getElementById('defaultTimer').value = this.settings.defaultTimer;
   }
 
   setupEventListeners() {
@@ -96,11 +92,6 @@ class SettingsManager {
       document.getElementById(id).addEventListener('change', (e) => {
         this.updateSetting(id, e.target.checked);
       });
-    });
-
-    // Default Timer
-    document.getElementById('defaultTimer').addEventListener('change', (e) => {
-      this.updateSetting('defaultTimer', parseInt(e.target.value));
     });
 
     // Reset button
@@ -145,10 +136,10 @@ class SettingsManager {
           isPremium: local.isPremium,
           premiumEmail: local.premiumEmail
         });
-        console.log('✅ Migrated premium status to sync storage');
+        // Migration successful - silent in production
       }
     } catch (error) {
-      console.error('Error migrating premium status:', error);
+      // Silent fail - non-critical migration error
     }
   }
 
@@ -163,7 +154,7 @@ class SettingsManager {
 
       this.updatePremiumUI(isPremium, premiumEmail);
     } catch (error) {
-      console.error('Error loading premium status:', error);
+      // Silent fail - will show default free tier state
     }
   }
 
@@ -178,18 +169,20 @@ class SettingsManager {
       // Try to get user's Google account email
       chrome.identity.getProfileUserInfo({ accountStatus: 'ANY' }, async (userInfo) => {
         if (chrome.runtime.lastError) {
-          console.log('Identity API not available:', chrome.runtime.lastError);
+          // Identity API not available - silently fail
           return;
         }
 
         if (userInfo && userInfo.email) {
-          console.log('🔍 Auto-detecting premium status for:', userInfo.email);
-
-          // Check if this email is premium
+          // Check if this email is premium (DO NOT log email - privacy violation)
           try {
             const response = await fetch(`${GhostPadConfig.API_URL}/verify-premium`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'X-GhostPad-Extension': 'true',
+                'X-Extension-Version': chrome.runtime.getManifest().version
+              },
               body: JSON.stringify({ email: userInfo.email })
             });
 
@@ -215,18 +208,15 @@ class SettingsManager {
               // Update UI
               this.updatePremiumUI(true, userInfo.email);
               this.showActivationStatus('success', '🎉 Premium auto-activated! You now have unlimited notes.');
-
-              console.log('✅ Premium auto-activated for:', userInfo.email);
-            } else {
-              console.log('ℹ️ Email not found in premium users:', userInfo.email);
             }
+            // Silently continue if email not found
           } catch (error) {
-            console.log('Error auto-detecting premium:', error);
+            // Silent fail - auto-detection is optional
           }
         }
       });
     } catch (error) {
-      console.error('Error in auto-detection:', error);
+      // Silent fail - auto-detection is optional
     }
   }
 
@@ -270,7 +260,9 @@ class SettingsManager {
       const response = await fetch(`${GhostPadConfig.API_URL}/verify-premium`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-GhostPad-Extension': 'true',
+          'X-Extension-Version': chrome.runtime.getManifest().version
         },
         body: JSON.stringify({ email })
       });
@@ -309,7 +301,7 @@ class SettingsManager {
         );
       }
     } catch (error) {
-      console.error('Premium activation error:', error);
+      // Show user-friendly error message (don't log to console)
       this.showActivationStatus(
         'error',
         `Verification failed. Please check your internet connection and try again. If you just paid, please wait a few minutes for the payment to process.`
